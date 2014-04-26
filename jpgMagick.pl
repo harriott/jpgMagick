@@ -24,7 +24,7 @@ my $imgdone;
 my %resph = (
 	'c' => '$image->Charcoal($param); $imgdone = $image->[0]',
 	'g' => '$image->Resize(geometry => \'1000x800\'); $imgdone = $image->[0]',
-#	- prefers the larger dimension.
+#	- preserves ratio, never exceeding either of these dimensions.
 	'k' => '$image->Sketch(0); $imgdone = $image->[0]',
 #   'p' => '$imgdone = $image->Preview(\'Charcoal\')',
 	's' => '$image->Resize(geometry => \'1150\'); $imgdone = $image->[0]',
