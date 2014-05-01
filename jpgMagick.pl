@@ -25,8 +25,11 @@ my %resph = (
 	'c' => '$image->Charcoal($param); $imgdone = $image->[0]',
 	'g' => '$image->Resize(geometry => \'1000x800\'); $imgdone = $image->[0]',
 #	- preserves ratio, never exceeding either of these dimensions.
+#	- badly degrades pencil sketches...
 	'k' => '$image->Sketch(0); $imgdone = $image->[0]',
+	'o' => '$image->OilPaint($param); $imgdone = $image->[0]',
 #   'p' => '$imgdone = $image->Preview(\'Charcoal\')',
+    'p' => '$imgdone = $image->Preview(\'OilPaint\')',
 	's' => '$image->Resize(geometry => \'1150\'); $imgdone = $image->[0]',
 );
 
@@ -38,12 +41,12 @@ print "hit Enter to quit, or go ahead with one of these ImageMagick conversion c
 foreach my $key (sort keys %resph){print "  Enter $key for $resph{$key}\n";}
 my $resp = <STDIN>;
 chomp $resp; # Get rid of newline character at the end
-my @params = (0);  # - this array needs at least one value for later
+my @params = (-1);  # - this array prep'd with a negative number for later.
 unless ($resph{$resp}) {print "Quit!  "; exit 0;}  # - if there's no response hash value chosen
 # in special case requiring a parameter list, fill out more values:
-if ($resp eq 'c') {
+if ($resp eq 'c' || $resp eq 'o') {
 	if ($resp eq 'c') {@params = (0, 90)}
-	else {@params = (1, 2, 3, 4, 5, 6, 7, 8, 9)}  # - not actually used, but left in
+	elsif ($resp eq 'o') {@params = (0, 0.5, 1, 1.5, 2, 3, 5)}
 	print "Enter to go ahead with these factor values: @params\n",
 		"  or Enter your own space-separated list of factor value(s):\n";
 	my @fresp = split(/\s+/, <>);  # - get the response into an array (even a null array)
@@ -77,19 +80,25 @@ closedir(DIR);
 print "  $resph{$resp}";
 local $| = 1;  # - turns off line buffering on STDOUT
 my $jpgname;
+my $prmstr;
 foreach my $jpeg (@jpegs) {
 	print "\n  Converting $jpeg ";
 	my $jpegbn = substr $jpeg, 0, -4;
     $image->Read($jpeg);
 	foreach my $param (@params) {
 		my $tmstmp = POSIX::strftime("%H%M%S", localtime);
-		if ($params[1]) {print $param." ".$tmstmp." "}
-		eval $resph{$resp}; warn $@ if $@;
-		$jpgname = "./$jpegbn"."_$param$resp.jpg";  # - adding in parameter tag to jpeg name
+		# neatly format the parameter strings for adding to changed filename:
+		if ($resp eq 'o') {$prmstr = sprintf("%.1f", $param)}
+		else {$prmstr = sprintf("%02s", $param)}
+		if ($params[1]) {
+			print $prmstr." ".$tmstmp." "  # - just reporting time as a progress check
+		}
+		eval $resph{$resp}; warn $@ if $@; # - do the conversion!
+		$jpgname = "./$jpegbn"."_$prmstr$resp.jpg";  # - adding in parameter tag to jpeg name
 		$imgdone->Write(filename => "./$jpgname");
 	}
 	move $jpeg, "$ors/$jpeg";
-	unless ($params[1]) {move $jpgname, "$jpegbn$resp.jpg"}  # - remove an unused parameter tag
+	if ($params[0] < 0) {move $jpgname, "$jpegbn$resp.jpg"}  # - remove an unused parameter tag
 	@$image = ();  # - empty the object, ready for next i/o
 #print " - done!\n"
 }
