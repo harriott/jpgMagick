@@ -21,11 +21,13 @@ END { print "\nThis Perl program ran for ", time() - $^T, " seconds.  All change
 
 # And a response hash for the conversions:
 my $imgdone;
+my $label;
 my %resph = (
-	'c' => '$image->Charcoal($param); $imgdone = $image->[0]',
+	'c' => '$image->Composite(image=>$label, gravity=>\'southeast\'); $imgdone = $image->[0]',
 	'g' => '$image->Resize(geometry => \'1000x800\'); $imgdone = $image->[0]',
 #	- preserves ratio, never exceeding either of these dimensions.
 #	- badly degrades pencil sketches...
+	'h' => '$image->Charcoal($param); $imgdone = $image->[0]',
 	'k' => '$image->Sketch(0); $imgdone = $image->[0]',
 	'o' => '$image->OilPaint($param); $imgdone = $image->[0]',
 #   'p' => '$imgdone = $image->Preview(\'Charcoal\')',
@@ -44,8 +46,8 @@ chomp $resp; # Get rid of newline character at the end
 my @params = (-1);  # - this array prep'd with a negative number for later.
 unless ($resph{$resp}) {print "Quit!  "; exit 0;}  # - if there's no response hash value chosen
 # in special case requiring a parameter list, fill out more values:
-if ($resp eq 'c' || $resp eq 'o') {
-	if ($resp eq 'c') {@params = (0, 90)}
+if ($resp eq 'h' || $resp eq 'o') {
+	if ($resp eq 'h') {@params = (0, 90)}
 	elsif ($resp eq 'o') {@params = (0, 0.5, 1, 1.5, 2, 3, 5)}
 	print "Enter to go ahead with these factor values: @params\n",
 		"  or Enter your own space-separated list of factor value(s):\n";
@@ -54,12 +56,15 @@ if ($resp eq 'c' || $resp eq 'o') {
 		my @userf =();
 		foreach my $entry (@fresp) {
 			if (looks_like_number($entry)) {
-				if ($resp eq 'c') {$entry = int($entry)}
+				if ($resp eq 'h') {$entry = int($entry)}
 				if ($entry >= 0 && $entry <= 99){push @userf, $entry}
 			}
 		}
 		@params = @userf
 	}
+} elsif ($resp eq 'c') { # load in the label:
+	$label = Image::Magick->new;
+	$label->Read("label.png");
 }
 print "Okay, working.  ";
 
@@ -94,7 +99,8 @@ foreach my $jpeg (@jpegs) {
 			print $prmstr." ".$tmstmp." "  # - just reporting time as a progress check
 		}
 		eval $resph{$resp}; warn $@ if $@; # - do the conversion!
-		$jpgname = "./$jpegbn"."_$prmstr$resp.jpg";  # - adding in parameter tag to jpeg name
+		$jpgname = "$jpegbn"."_$prmstr$resp.jpg";  # - adding in parameter tag to jpeg name
+		# This line fails if this script is run from Win7 on a filename containing 'é':
 		$imgdone->Write(filename => "./$jpgname");
 	}
 	move $jpeg, "$ors/$jpeg";
