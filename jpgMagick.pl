@@ -86,10 +86,16 @@ print "  $resph{$resp}";
 local $| = 1;  # - turns off line buffering on STDOUT
 my $jpgname;
 my $prmstr;
+my $jpgA = "jpgMagickinputASCII.jpg"; # - an unambiguous temporary ASCII name
+# (a precaution: if Image::Magick's Read method is used on a filename containing `é`
+# on Windows 7, this script fails at the Write method)
 foreach my $jpeg (@jpegs) {
 	print "\n  Converting $jpeg ";
 	my $jpegbn = substr $jpeg, 0, -4;
-    $image->Read($jpeg);
+	# temporarily move the jpeg to an uncomplicated filename:
+	move $jpeg, $jpgA;
+#   $image->Read($jpeg);
+    $image->Read($jpgA);
 	foreach my $param (@params) {
 		my $tmstmp = POSIX::strftime("%H%M%S", localtime);
 		# neatly format the parameter strings for adding to changed filename:
@@ -100,10 +106,13 @@ foreach my $jpeg (@jpegs) {
 		}
 		eval $resph{$resp}; warn $@ if $@; # - do the conversion!
 		$jpgname = "$jpegbn"."_$prmstr$resp.jpg";  # - adding in parameter tag to jpeg name
-		# This line fails if this script is run from Win7 on a filename containing 'é':
-		$imgdone->Write(filename => "./$jpgname");
+		# Here I'm again taking care not to feed an filename that might contain
+		# something like an `é` to Image::Magick because on Windows 7,
+		# that character becomes the Replacement character, fffd:
+		$imgdone->Write(filename => "./$prmstr.jpg");
+		move "$prmstr.jpg", $jpgname;
 	}
-	move $jpeg, "$ors/$jpeg";
+	move $jpgA, "$ors/$jpeg";
 	if ($params[0] < 0) {move $jpgname, "$jpegbn$resp.jpg"}  # - remove an unused parameter tag
 	@$image = ();  # - empty the object, ready for next i/o
 #print " - done!\n"
