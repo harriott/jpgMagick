@@ -29,6 +29,7 @@ my %resph = (
 #	- badly degrades pencil sketches...
 	'h' => '$image->Charcoal($param); $imgdone = $image->[0]',
 	'k' => '$image->Sketch(0); $imgdone = $image->[0]',
+	'l' => '$image->Resize(geometry => \'314\'); $imgdone = $image->[0]',
 	'o' => '$image->OilPaint($param); $imgdone = $image->[0]',
 #   'p' => '$imgdone = $image->Preview(\'Charcoal\')',
     'p' => '$imgdone = $image->Preview(\'OilPaint\')',
@@ -78,7 +79,7 @@ print "Originals will be moved to $ors\n";
 
 # Now work through the directory collecting jpeg file names:
 opendir(DIR, '.');
-my @jpegs = grep { /\.jpg$/ && -f "./$_" } readdir(DIR);
+my @jpegs = grep { /\.jpg$/i && -f "./$_" } readdir(DIR);
 closedir(DIR);
 
 # Finally, work through the list of jpegs, applying the relevant conversion:
