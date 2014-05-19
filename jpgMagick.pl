@@ -23,6 +23,7 @@ END { print "\nThis Perl program ran for ", time() - $^T, " seconds.  All change
 my $imgdone;
 my $label;
 my %resph = (
+	'b' => '$image->Border(width=>\'9\', height=>\'9\', bordercolor=>\'goldenrod4\'); $imgdone = $image->[0]',
 	'c' => '$image->Composite(image=>$label, gravity=>\'southeast\'); $imgdone = $image->[0]',
 	'g' => '$image->Resize(geometry => \'1000x800\'); $imgdone = $image->[0]',
 #	- preserves ratio, never exceeding either of these dimensions.
