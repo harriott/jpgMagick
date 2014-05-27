@@ -35,6 +35,10 @@ my %resph = (
 #   'p' => '$imgdone = $image->Preview(\'Charcoal\')',
     'p' => '$imgdone = $image->Preview(\'OilPaint\')',
 	's' => '$image->Resize(geometry => \'1150\'); $imgdone = $image->[0]',
+	'v' => '$image->Level(levels=>\'0,50%,7.0\'); $imgdone = $image->[0]',
+#                                 = black and white points, then gamma
+	'v' => '$image->Level(levels=>\'0,100%,\'.$param); $imgdone = $image->[0]',
+#                                 - using a range, defined below.
 );
 
 # Next, request input for conversions:
@@ -48,9 +52,10 @@ chomp $resp; # Get rid of newline character at the end
 my @params = (-1);  # - this array prep'd with a negative number for later.
 unless ($resph{$resp}) {print "Quit!  "; exit 0;}  # - if there's no response hash value chosen
 # in special case requiring a parameter list, fill out more values:
-if ($resp eq 'h' || $resp eq 'o') {
+if ($resp eq 'h' || $resp eq 'o' || $resp eq 'v') {
 	if ($resp eq 'h') {@params = (0, 90)}
 	elsif ($resp eq 'o') {@params = (0, 0.5, 1, 1.5, 2, 3, 5)}
+	elsif ($resp eq 'v') {@params = (3.3, 3.4)}
 	print "Enter to go ahead with these factor values: @params\n",
 		"  or Enter your own space-separated list of factor value(s):\n";
 	my @fresp = split(/\s+/, <>);  # - get the response into an array (even a null array)
@@ -101,7 +106,7 @@ foreach my $jpeg (@jpegs) {
 	foreach my $param (@params) {
 		my $tmstmp = POSIX::strftime("%H%M%S", localtime);
 		# neatly format the parameter strings for adding to changed filename:
-		if ($resp eq 'o') {$prmstr = sprintf("%.1f", $param)}
+		if ($resp eq 'o' || $resp eq 'v') {$prmstr = sprintf("%.1f", $param)}
 		else {$prmstr = sprintf("%02s", $param)}
 		if ($params[1]) {
 			print $prmstr." ".$tmstmp." "  # - just reporting time as a progress check
