@@ -70,8 +70,11 @@ if ($resp eq 'h' || $resp eq 'o' || $resp eq 'v') {
 		@params = @userf
 	}
 } elsif ($resp eq 'c') { # load in the label:
-	$label = Image::Magick->new;
-	$label->Read("label.png");
+	if (-e "label.png") {
+		$label = Image::Magick->new;
+		$label->Read("label.png")}
+	else {
+		print "No label.png here!"; exit 0}
 }
 print "Okay, working.  ";
 
