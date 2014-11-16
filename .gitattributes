@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+# need to also run these commands in the repository:
+# git config core.eol lf
+# git config core.autocrlf input
