@@ -3,4 +3,4 @@
 # need to also run these commands in the repository:
 # git config core.eol lf
 # git config core.autocrlf input
-# they modify .git\config
+# - they modify .git\config
