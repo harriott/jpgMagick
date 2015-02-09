@@ -1,4 +1,6 @@
 #!/usr/bin/perl
+# Joseph Harriott  http://momentary.eu/ 2014
+
 # This script does various transformations on jpegs in the directory that it's in.
 # The original jpegs are moved out to a folder (which is cleared first if it's not empty).
 # Uses PerlMagick API.
