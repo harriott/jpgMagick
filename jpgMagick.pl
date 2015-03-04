@@ -33,6 +33,7 @@ my %resph = (
 	'h' => '$image->Charcoal($param); $imgdone = $image->[0]',
 	'k' => '$image->Sketch(0); $imgdone = $image->[0]',
 	'l' => '$image->Resize(geometry => \'314\'); $imgdone = $image->[0]',
+	'n' => '$image->Negate(); $imgdone = $image->[0]',
 	'o' => '$image->OilPaint($param); $imgdone = $image->[0]',
 #   'p' => '$imgdone = $image->Preview(\'Charcoal\')',
     'p' => '$imgdone = $image->Preview(\'OilPaint\')',
