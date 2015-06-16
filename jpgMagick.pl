@@ -38,6 +38,7 @@ my %resph = (
 #   'p' => '$imgdone = $image->Preview(\'Charcoal\')',
     'p' => '$imgdone = $image->Preview(\'OilPaint\')',
 	's' => '$image->Resize(geometry => \'1150\'); $imgdone = $image->[0]',
+	't' => '$image->Resize(geometry => \'90\'); $imgdone = $image->[0]',
 	'v' => '$image->Level(levels=>\'0,50%,7.0\'); $imgdone = $image->[0]',
 #                                 = black and white points, then gamma
 	'v' => '$image->Level(levels=>\'0,100%,\'.$param); $imgdone = $image->[0]',
