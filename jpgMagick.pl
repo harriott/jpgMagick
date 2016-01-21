@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Joseph Harriott  http://momentary.eu/ 2014
+# Joseph Harriott  http://momentary.eu/ Thu 21 Jan 2016
 
 # This script does various transformations on jpegs in the directory that it's in.
 # The original jpegs are moved out to a folder (which is cleared first if it's not empty).
@@ -37,6 +37,7 @@ my %resph = (
 	'o' => '$image->OilPaint($param); $imgdone = $image->[0]',
 #   'p' => '$imgdone = $image->Preview(\'Charcoal\')',
     'p' => '$imgdone = $image->Preview(\'OilPaint\')',
+	'r' => '$image->Chop(geometry => \'0x1000\'); $image->Chop(geometry => \'0x300\', gravity => \'South\'); $image->Chop(geometry => \'1000x0\', gravity => \'East\'); $image->Chop(geometry => \'300x0\', gravity => \'West\'); $imgdone = $image->[0]',
 	's' => '$image->Resize(geometry => \'1150\'); $imgdone = $image->[0]',
 	't' => '$image->Resize(geometry => \'90\'); $imgdone = $image->[0]',
 	'v' => '$image->Level(levels=>\'0,50%,7.0\'); $imgdone = $image->[0]',

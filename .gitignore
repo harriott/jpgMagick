@@ -1,0 +1,4 @@
+
+# Ignore Dolphin's hidden config file
+# ----------------------------------
+.directory
