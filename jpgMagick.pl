@@ -1,5 +1,9 @@
 #!/usr/bin/perl
-# Joseph Harriott  http://momentary.eu/ Thu 21 Jan 2016
+# Joseph Harriott  http://momentary.eu/ Wed 11 Apr 2018
+
+# This script was useful while building a website,
+# but has since got into a tangle and needs repairs, at least for GNU/Linux.
+# It won't work on Windows 10 because PerlMagick won't install...
 
 # This script does various transformations on jpegs in the directory that it's in.
 # The original jpegs are moved out to a folder (which is cleared first if it's not empty).
@@ -7,8 +11,7 @@
 
 # Prerequisites:  a system with Perl on, and a folder of jpegs (without spaces in the names).
 
-# Drop this file into the parent folder that you want to work on, open a Terminal there,
-# enter the name of this file, hit return, and watch the progress!
+# Drop this file into the parent folder that you want to work on, and run it.
 
 use strict;  use warnings;
 use File::Basename;
@@ -25,24 +28,24 @@ END { print "\nThis Perl program ran for ", time() - $^T, " seconds.  All change
 my $imgdone;
 my $label;
 my %resph = (
-	'b' => '$image->Border(width=>\'9\', height=>\'9\', bordercolor=>\'goldenrod4\'); $imgdone = $image->[0]',
-	'c' => '$image->Composite(image=>$label, gravity=>\'southeast\'); $imgdone = $image->[0]',
-	'g' => '$image->Resize(geometry => \'1000x800\'); $imgdone = $image->[0]',
+	'b' => '$imageObject->Border(width=>\'9\', height=>\'9\', bordercolor=>\'goldenrod4\'); $imgdone = $imageObject->[0]',
+	'c' => '$imageObject->Composite(image=>$label, gravity=>\'southeast\'); $imgdone = $imageObject->[0]',
+	'g' => '$imageObject->Resize(geometry => \'1000x800\'); $imgdone = $imageObject->[0]',
 #	- preserves ratio, never exceeding either of these dimensions.
 #	- badly degrades pencil sketches...
-	'h' => '$image->Charcoal($param); $imgdone = $image->[0]',
-	'k' => '$image->Sketch(0); $imgdone = $image->[0]',
-	'l' => '$image->Resize(geometry => \'314\'); $imgdone = $image->[0]',
-	'n' => '$image->Negate(); $imgdone = $image->[0]',
-	'o' => '$image->OilPaint($param); $imgdone = $image->[0]',
-#   'p' => '$imgdone = $image->Preview(\'Charcoal\')',
-    'p' => '$imgdone = $image->Preview(\'OilPaint\')',
-	'r' => '$image->Chop(geometry => \'0x1000\'); $image->Chop(geometry => \'0x300\', gravity => \'South\'); $image->Chop(geometry => \'1000x0\', gravity => \'East\'); $image->Chop(geometry => \'300x0\', gravity => \'West\'); $imgdone = $image->[0]',
-	's' => '$image->Resize(geometry => \'1150\'); $imgdone = $image->[0]',
-	't' => '$image->Resize(geometry => \'90\'); $imgdone = $image->[0]',
-	'v' => '$image->Level(levels=>\'0,50%,7.0\'); $imgdone = $image->[0]',
+	'h' => '$imageObject->Charcoal($param); $imgdone = $imageObject->[0]',
+	'k' => '$imageObject->Sketch(0); $imgdone = $imageObject->[0]',
+	'l' => '$imageObject->Resize(geometry => \'314\'); $imgdone = $imageObject->[0]',
+	'n' => '$imageObject->Negate(); $imgdone = $imageObject->[0]',
+	'o' => '$imageObject->OilPaint($param); $imgdone = $imageObject->[0]',
+#   'p' => '$imgdone = $imageObject->Preview(\'Charcoal\')',
+    'p' => '$imgdone = $imageObject->Preview(\'OilPaint\')',
+	'r' => '$imageObject->Chop(geometry => \'0x1000\'); $imageObject->Chop(geometry => \'0x300\', gravity => \'South\'); $imageObject->Chop(geometry => \'1000x0\', gravity => \'East\'); $imageObject->Chop(geometry => \'300x0\', gravity => \'West\'); $imgdone = $imageObject->[0]',
+	's' => '$imageObject->Resize(geometry => \'1150\'); $imgdone = $imageObject->[0]',
+	't' => '$imageObject->Resize(geometry => \'90\'); $imgdone = $imageObject->[0]',
+#   'v' => '$imageObject->Level(levels=>\'0,50%,7.0\'); $imgdone = $imageObject->[0]',
 #                                 = black and white points, then gamma
-	'v' => '$image->Level(levels=>\'0,100%,\'.$param); $imgdone = $image->[0]',
+    'v' => '$imageObject->Level(levels=>\'0,100%,\'.$param); $imgdone = $imageObject->[0]',
 #                                 - using a range, defined below.
 );
 
@@ -84,7 +87,7 @@ if ($resp eq 'h' || $resp eq 'o' || $resp eq 'v') {
 print "Okay, working.  ";
 
 # Create an image object:
-my $image = Image::Magick->new;
+my $imageObject = Image::Magick->new;
 
 # Empty or create the directory to move the originals into:
 remove_tree($ors,{keep_root=>1});
@@ -95,6 +98,7 @@ print "Originals will be moved to $ors\n";
 opendir(DIR, '.');
 my @jpegs = grep { /\.jpg$/i && -f "./$_" } readdir(DIR);
 closedir(DIR);
+print "\nThe images: @jpegs\n\n"; # debug
 
 # Finally, work through the list of jpegs, applying the relevant conversion:
 print "  $resph{$resp}";
@@ -106,22 +110,24 @@ my $jpgA = "jpgMagickinputASCII.jpg"; # - an unambiguous temporary ASCII name
 # on Windows 7, this script fails at the Write method)
 foreach my $jpeg (@jpegs) {
 	print "\n  Converting $jpeg ";
-	my $jpegbn = substr $jpeg, 0, -4;
+	my $jpegbn = substr $jpeg, 0, -4; # the jpeg's basename
 	# temporarily move the jpeg to an uncomplicated filename:
 	move $jpeg, $jpgA;
-#   $image->Read($jpeg);
-    $image->Read($jpgA);
+#   $imageObject->Read($jpeg);
+    $imageObject->Read($jpgA);
 	foreach my $param (@params) {
 		my $tmstmp = POSIX::strftime("%H%M%S", localtime);
 		# neatly format the parameter strings for adding to changed filename:
 		if ($resp eq 'o' || $resp eq 'v') {$prmstr = sprintf("%.1f", $param)}
 		else {$prmstr = sprintf("%02s", $param)}
+		print "\n\n\$prmstr = $prmstr\n\n"; # debug
 		if ($params[1]) {
 			print $prmstr." ".$tmstmp." "  # - just reporting time as a progress check
 		}
-		eval $resph{$resp}; warn $@ if $@; # - do the conversion!
+		# eval $resph{$resp}; warn $@ if $@; # - do the conversion!
+		$imageObject->Negate(); $imgdone = $imageObject->[0]; warn $@ if $@; # - do the conversion!
 		$jpgname = "$jpegbn"."_$prmstr$resp.jpg";  # - adding in parameter tag to jpeg name
-		# Here I'm again taking care not to feed an filename that might contain
+		# Here I'm again taking care not to feed a filename that might contain
 		# something like an `é` to Image::Magick because on Windows 7,
 		# that character becomes the Replacement character, fffd:
 		$imgdone->Write(filename => "./$prmstr.jpg");
@@ -129,7 +135,7 @@ foreach my $jpeg (@jpegs) {
 	}
 	move $jpgA, "$ors/$jpeg";
 	if ($params[0] < 0) {move $jpgname, "$jpegbn$resp.jpg"}  # - remove an unused parameter tag
-	@$image = ();  # - empty the object, ready for next i/o
+	@$imageObject = ();  # - empty the object, ready for next i/o
 #print " - done!\n"
 }
-undef $image;
+undef $imageObject;
